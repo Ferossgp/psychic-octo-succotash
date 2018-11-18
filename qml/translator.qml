@@ -6,7 +6,11 @@ import "service"
 ApplicationWindow
 {
     Dao { id: dao }
-    initialPage: Component { HistoryPage { } }
+    // TODO: Get from env vars
+    property string defaultLang: ""
+    property string yandexAPI: ""
+
+    initialPage: Component { FirstPage { } }
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
 }
