@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0">
+<TS version="2.1">
 <context>
     <name>CoverPage</name>
     <message>
@@ -24,13 +24,25 @@
     </message>
 </context>
 <context>
-    <name>SecondPage</name>
+    <name>HistoryPage</name>
     <message>
-        <source>Nested Page</source>
+        <source>History</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Item</source>
+        <source>Star</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You don&apos;t have any item in history right now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unstar</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

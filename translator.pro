@@ -19,13 +19,14 @@ SOURCES += src/translator.cpp
 DISTFILES += qml/translator.qml \
     qml/cover/CoverPage.qml \
     qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
     rpm/translator.changes.in \
     rpm/translator.changes.run.in \
     rpm/translator.spec \
     rpm/translator.yaml \
     translations/*.ts \
-    translator.desktop
+    translator.desktop \
+    qml/service/Dao.qml \
+    qml/pages/HistoryPage.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
