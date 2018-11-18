@@ -118,6 +118,8 @@ Page {
                         color = placeholderVisible ? Theme.secondaryHighlightColor : Theme.highlightColor;
                     } else {
                         color = placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
+                        translationModel.inputText = text;
+                        translationModel.reload()
                     }
                 }
                 onTextChanged: {
@@ -131,6 +133,12 @@ Page {
                         color = Theme.secondaryHighlightColor;
                         placeholderVisible = true;
                     }
+                }
+                Component.onCompleted: {
+                    dao.createHistoryItem(fromLangComboBox.currentIndex.value,
+                                          toLangComboBox.currentIndex.value,
+                                          translationModel.inputText,
+                                          translatedText, false);
                 }
             }
             TextArea {
@@ -155,6 +163,15 @@ Page {
             query: "/Langs/langs/Item"
             XmlRole {name: "value"; query: "@value/string()"}
             XmlRole {name: "key"; query: "@key/string()"}
+        }
+
+        XmlListModel {
+            id: translationModel
+            property string inputText: ""
+            property string lang: fromLangComboBox.currentItem.key + "-" + toLangComboBox.currentItem.key
+            source: "https://translate.yandex.net/api/v1.5/tr/translate?key=" + yandexAPI + "&text=" + inputText + "&lang=" + lang
+            query: "/Translation"
+            XmlRole {name: "translatedText"; query: "text/string()"}
         }
 
         Component.onCompleted: {
