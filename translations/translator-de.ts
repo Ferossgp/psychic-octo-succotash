@@ -31,7 +31,7 @@
         <translation></translation>
     </message>
     <message>
-        <source>Translate</source>
+        <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -143,8 +143,9 @@ Page {
                 onTextChanged: {
                     translationModel.inputText = text;
                     translationModel.reload();
-                    synonymsModel.inputText = '';
+                    synonymsModel.inputText = text;
                     synonymsModel.reload();
+                    saveButton.pressed = false;
                 }
             }
             TextArea {
@@ -158,19 +159,6 @@ Page {
                 color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
                 wrapMode: TextEdit.Wrap;
                 inputMethodHints: Qt.ImhNoPredictiveText;
-            }
-            Button {
-                text: qsTr('Translate')
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: {
-                    synonymsModel.inputText = originalTextEdit.text;
-                    synonymsModel.reload();
-                    dao.createHistoryItem(fromLangComboBox.currentIndex.value,
-                                          toLangComboBox.currentIndex.value,
-                                          translationModel.inputText,
-                                          translatedTextArea.text,
-                                          false);
-                }
             }
 
             TextArea {
@@ -221,6 +209,25 @@ Page {
                 color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
                 wrapMode: TextEdit.Wrap;
                 inputMethodHints: Qt.ImhNoPredictiveText;
+            }
+
+            Button {
+                id: saveButton
+                property bool pressed: false
+                text: qsTr('Save')
+                visible: translationModel.inputText && translatedTextArea.text
+                enabled: !pressed
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: {
+                    pressed = true;
+                    synonymsModel.inputText = originalTextEdit.text;
+                    synonymsModel.reload();
+                    dao.createHistoryItem(fromLangComboBox.currentIndex.value,
+                                          toLangComboBox.currentIndex.value,
+                                          translationModel.inputText,
+                                          translatedTextArea.text,
+                                          false);
+                }
             }
         }
 
