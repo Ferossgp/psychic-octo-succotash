@@ -142,14 +142,9 @@ Page {
                 inputMethodHints: Qt.ImhNoPredictiveText;
                 onTextChanged: {
                     translationModel.inputText = text;
-                    translationModel.reload()
-                }
-                Component.onCompleted: {
-                    dao.createHistoryItem(fromLangComboBox.currentIndex.value,
-                                          toLangComboBox.currentIndex.value,
-                                          translationModel.inputText,
-                                          translatedTextArea.text,
-                                          false);
+                    translationModel.reload();
+                    synonymsModel.inputText = '';
+                    synonymsModel.reload();
                 }
             }
             TextArea {
@@ -157,13 +152,76 @@ Page {
                 x: Theme.paddingLarge;
                 property var dataModel : translationModel
                 width: parent.width;
+                readOnly: true
                 text: dataModel.count ? dataModel.get(0).translatedText : "";
                 font.pixelSize: Theme.fontSizeMedium;
                 color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
                 wrapMode: TextEdit.Wrap;
                 inputMethodHints: Qt.ImhNoPredictiveText;
             }
+            Button {
+                text: qsTr('Translate')
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: {
+                    synonymsModel.inputText = originalTextEdit.text;
+                    synonymsModel.reload();
+                    dao.createHistoryItem(fromLangComboBox.currentIndex.value,
+                                          toLangComboBox.currentIndex.value,
+                                          translationModel.inputText,
+                                          translatedTextArea.text,
+                                          false);
+                }
+            }
 
+            TextArea {
+                id: synonymsTextArea;
+                x: Theme.paddingLarge;
+                property var dataModel : synonymsModel
+                width: parent.width;
+                readOnly: true
+                label: qsTr('Synonyms')
+                text: {
+                    var length = dataModel.count;
+                    if (length === 0) {
+                        return "";
+                    }
+                    var res = "";
+                    var nCount = 3, vCount = 3, aCount = 3, otherCount = 3;
+                    var needAdd = false;
+                    for(var i = 0; i < length; i++) {
+                        var item = dataModel.get(i);
+                        switch (item.pos) {
+                        case 'noun':
+                            needAdd = nCount > 0;
+                            nCount -= 1;
+                            break;
+                        case 'verb':
+                            needAdd = vCount > 0;
+                            vCount -= 1;
+                            break;
+                        case 'adjective':
+                            needAdd = aCount > 0;
+                            aCount -= 1;
+                            break;
+                        default:
+                            needAdd = otherCount > 0;
+                            otherCount -= 1;
+                            break;
+                        }
+                        if (needAdd) {
+                            if (i !== 0) {
+                                res += '\n';
+                            }
+                            res += item.pos.substring(0, 1) + ': ' + item.def
+                        }
+                    }
+                    return res;
+                }
+                font.pixelSize: Theme.fontSizeMedium;
+                color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
+                wrapMode: TextEdit.Wrap;
+                inputMethodHints: Qt.ImhNoPredictiveText;
+            }
         }
 
         XmlListModel {
@@ -182,27 +240,36 @@ Page {
                 var to = toLangComboBox;
                 var fromEntry = from.dataModel.get(from.currentIndex);
                 var toEntry = to.dataModel.get(to.currentIndex);
-                console.log(JSON.stringify(fromEntry));
-                console.log(JSON.stringify(toEntry));
                 return (fromEntry ? fromEntry.key : defaultLang) + "-" + (toEntry ? toEntry.key : defaultToLang);
             }
             source: "https://translate.yandex.net/api/v1.5/tr/translate?key=" + yandexAPI + "&text=" + inputText + "&lang=" + lang
             query: "/Translation"
             XmlRole {name: "translatedText"; query: "text/string()"}
-            onStatusChanged: {
-                if (status !== XmlListModel.Ready) {
-                    return;
-                }
-                var length = translationModel.count;
-                for (var i = 0; i < length; i++) {
-                    console.log(JSON.stringify(translationModel.get(i)));
-                }
+        }
 
+        XmlListModel {
+            id: synonymsModel
+            property string inputText: ""
+            property string lang: {
+                var from = fromLangComboBox;
+                var to = toLangComboBox;
+                var fromEntry = from.dataModel.get(from.currentIndex);
+                var toEntry = to.dataModel.get(to.currentIndex);
+                return (fromEntry ? fromEntry.key : defaultLang) + "-" + (toEntry ? toEntry.key : defaultToLang);
             }
+            source: {
+                if (inputText.length === 0) {
+                    return "";
+                }
+                return "https://dictionary.yandex.net/api/v1/dicservice/lookup?key=" + yandexDictAPI + "&text=" + inputText + "&lang=" + lang
+            }
+            query: "/DicResult/def/tr"
+            XmlRole {name: "def"; query: "text/string()"}
+            XmlRole {name: "pos"; query: "@pos/string()"}
         }
 
         Component.onCompleted: {
-            translation = {text: "", translated: ""};
+            translation = {text: "", translated: "", synonyms: []};
         }
     }
 }

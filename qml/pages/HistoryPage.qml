@@ -36,9 +36,10 @@ Page {
                 height: page.height - header.height - Theme.paddingLarge * 2
                 clip: true
                 delegate: ListItem {
+                    highlighted: starred
                     Label {
                         id: historyText
-                        text: text
+                        text: model.text
                         truncationMode: TruncationMode.Fade
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.paddingLarge
@@ -47,23 +48,23 @@ Page {
                     }
                     Label {
                         id: sumLabel
-                        text: translatedText
+                        text: translated
                         anchors.right: parent.right
                         anchors.rightMargin: Theme.paddingLarge
                     }
                     menu: ContextMenu {
                         MenuItem {
-                            text: star ? qsTr("Unstar") : qsTr("Star")
+                            text: starred ? qsTr("Unstar") : qsTr("Star")
                             onClicked: {
-                                listView.model.changePreference(id, !star)
-                                dao.starHistoryItem(id, !star);
+                                dao.starHistoryItem(id, !starred);
+                                model.starred = !starred;
                             }
                         }
                         MenuItem {
                             text: qsTr("Remove")
                             onClicked:  {
                                 dao.removeHistoryItem(id);
-                                listView.model.remove(model.index);
+                                listView.model.remove(index);
                             }
                         }
                     }
@@ -80,11 +81,13 @@ Page {
             if(historyItems.length !== 0) {
                 for (var i = 0; i < historyItems.length; i++) {
                     var historyItem = historyItems.item(i);
+                    console.log(JSON.stringify(historyItem));
                     listView.model.addHistory(historyItem.id,
                                               historyItem.langOriginal,
                                               historyItem.langTranslation,
                                               historyItem.text,
-                                              historyItem.translated);
+                                              historyItem.translated,
+                                              !!historyItem.starred);
                 }
             } else {
                 emptyHistory.text = qsTr("You don't have any item in history right now");

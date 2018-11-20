@@ -28,6 +28,14 @@
     </message>
     <message>
         <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Translate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Synonyms</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

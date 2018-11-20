@@ -8,8 +8,8 @@ ApplicationWindow
     Dao { id: dao }
     id: root
     // TODO: Get from env vars
-    property string defaultLang: "ru"
-    property string defaultToLang: "en"
+    property string defaultLang: "en"
+    property string defaultToLang: "ru"
     property string yandexAPI: '***'
     property string yandexDictAPI: '***'
 
