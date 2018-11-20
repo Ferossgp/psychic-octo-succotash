@@ -9,11 +9,11 @@ ListModel {
                    langTranslation: langTranslation,
                    text: text,
                    translated: translated,
-                   stared: false,
+                   starred: false,
                });
     }
 
     function changePreference(index, state) {
-        set(index, {stared: state})
+        set(index, {starred: state})
     }
 }

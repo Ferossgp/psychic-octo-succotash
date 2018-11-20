@@ -9,6 +9,10 @@ Page {
     property var translation;
     property bool placeholderVisible: translation.text.length === 0
     property string placeholder: qsTr("Start typing...")
+    property string yandexAPI
+    property string yandexDictAPI
+    property string defaultLang: 'en'
+    property string defaultToLang: 'ru'
 
     // To enable PullDownMenu, place our content in a SilicaFlickable
 
@@ -54,13 +58,25 @@ Page {
                             MenuItem {
                                 text: model.value
                                 truncationMode: TruncationMode.Fade
+                                onClicked: fromLangComboBox.selectLang(index)
                             }
                         }
                     }
-                    function selectLang(id) {
-                        fromLangComboBox.currentIndex = fromLangComboBox.dataModel.getIndexById(id)
+                    function selectLang(index) {
+                        currentIndex = index;
                     }
+                    onCurrentItemChanged: {
+                        var length = dataModel.count;
+                        if (currentIndex !== 0) {
+                            return;
+                        }
 
+                        for (var i = 0; i < length; i++) {
+                            if (dataModel.get(i).key === defaultLang) {
+                                currentIndex = i;
+                            }
+                        }
+                    }
                 }
 
                 IconButton {
@@ -70,6 +86,7 @@ Page {
                                                                     ? Theme.highlightColor
                                                                     : Theme.primaryColor)
                     onClicked: {
+                        originalTextEdit.text = translatedTextArea.text;
                         var to = toLangComboBox.currentIndex;
                         toLangComboBox.currentIndex = fromLangComboBox.currentIndex;
                         fromLangComboBox.currentIndex = to;
@@ -90,11 +107,24 @@ Page {
                             MenuItem {
                                 text: model.value
                                 truncationMode: TruncationMode.Fade
+                                onClicked: toLangComboBox.selectLang(index)
                             }
                         }
                     }
-                    function selectLang(id) {
-                        toLangComboBox.currentIndex = toLangComboBox.dataModel.getIndexById(id)
+                    function selectLang(index) {
+                        currentIndex = index;
+                    }
+                    onCurrentItemChanged: {
+                        var length = dataModel.count;
+                        if (currentIndex !== 0) {
+                            return;
+                        }
+
+                        for (var i = 0; i < length; i++) {
+                            if (dataModel.get(i).key === defaultToLang) {
+                                currentIndex = i;
+                            }
+                        }
                     }
 
                 }
@@ -105,54 +135,33 @@ Page {
                 id: originalTextEdit;
                 width: parent.width - Theme.paddingLarge;
                 label: qsTr("");
-                text: placeholderVisible ? placeholder : translation.text;
                 font.pixelSize: Theme.fontSizeMedium;
                 color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
                 wrapMode: TextEdit.Wrap;
+                placeholderText: placeholder
                 inputMethodHints: Qt.ImhNoPredictiveText;
-                onCursorPositionChanged: {
-                    if (placeholderVisible) cursorPosition = 0;
-                }
-                onFocusChanged: {
-                    if (focus) {
-                        color = placeholderVisible ? Theme.secondaryHighlightColor : Theme.highlightColor;
-                    } else {
-                        color = placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
-                        translationModel.inputText = text;
-                        translationModel.reload()
-                    }
-                }
                 onTextChanged: {
-                    if (focus && text !== placeholder && placeholderVisible) {
-                        text = text.replace(placeholder, "");
-                        color = Theme.highlightColor;
-                        cursorPosition += 1;
-                        placeholderVisible = false;
-                    } else if (text.length === 0 && !placeholderVisible) {
-                        text = placeholder;
-                        color = Theme.secondaryHighlightColor;
-                        placeholderVisible = true;
-                    }
+                    translationModel.inputText = text;
+                    translationModel.reload()
                 }
                 Component.onCompleted: {
                     dao.createHistoryItem(fromLangComboBox.currentIndex.value,
                                           toLangComboBox.currentIndex.value,
                                           translationModel.inputText,
-                                          translatedText, false);
+                                          translatedTextArea.text,
+                                          false);
                 }
             }
             TextArea {
+                id: translatedTextArea;
                 x: Theme.paddingLarge;
-                id: originalTextEdit2;
+                property var dataModel : translationModel
                 width: parent.width;
-                text: translation.translated;
+                text: dataModel.count ? dataModel.get(0).translatedText : "";
                 font.pixelSize: Theme.fontSizeMedium;
                 color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
                 wrapMode: TextEdit.Wrap;
                 inputMethodHints: Qt.ImhNoPredictiveText;
-                onTextChanged: {
-                    text = translation.translated
-                }
             }
 
         }
@@ -168,14 +177,32 @@ Page {
         XmlListModel {
             id: translationModel
             property string inputText: ""
-            property string lang: fromLangComboBox.currentItem.key + "-" + toLangComboBox.currentItem.key
+            property string lang: {
+                var from = fromLangComboBox;
+                var to = toLangComboBox;
+                var fromEntry = from.dataModel.get(from.currentIndex);
+                var toEntry = to.dataModel.get(to.currentIndex);
+                console.log(JSON.stringify(fromEntry));
+                console.log(JSON.stringify(toEntry));
+                return (fromEntry ? fromEntry.key : defaultLang) + "-" + (toEntry ? toEntry.key : defaultToLang);
+            }
             source: "https://translate.yandex.net/api/v1.5/tr/translate?key=" + yandexAPI + "&text=" + inputText + "&lang=" + lang
             query: "/Translation"
             XmlRole {name: "translatedText"; query: "text/string()"}
+            onStatusChanged: {
+                if (status !== XmlListModel.Ready) {
+                    return;
+                }
+                var length = translationModel.count;
+                for (var i = 0; i < length; i++) {
+                    console.log(JSON.stringify(translationModel.get(i)));
+                }
+
+            }
         }
 
         Component.onCompleted: {
-            translation = {text: "", translated: "Text"};
+            translation = {text: "", translated: ""};
         }
     }
 }

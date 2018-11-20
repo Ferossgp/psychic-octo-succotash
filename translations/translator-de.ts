@@ -15,11 +15,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add a picture</source>
+        <source>Start typing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Add a photo</source>
+        <source>From:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source></source>
         <translation type="unfinished"></translation>
     </message>
 </context>

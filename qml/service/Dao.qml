@@ -7,13 +7,16 @@ Item {
     Component.onCompleted: {
         database = LocalStorage.openDatabaseSync("Translator", "1.0");
         database.transaction(function(tx) {
+            tx.executeSql("DROP TABLE HistoryTable");
+        });
+        database.transaction(function(tx) {
             tx.executeSql("CREATE TABLE IF NOT EXISTS HistoryTable(
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         langOriginal TEXT,
                         langTranslation TEXT,
                         text TEXT,
                         translated TEXT,
-                        stared INTEGER)");
+                        starred INTEGER)");
         });
     }
 
