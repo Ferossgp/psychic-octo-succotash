@@ -81,7 +81,6 @@ Page {
             if(historyItems.length !== 0) {
                 for (var i = 0; i < historyItems.length; i++) {
                     var historyItem = historyItems.item(i);
-                    console.log(JSON.stringify(historyItem));
                     listView.model.addHistory(historyItem.id,
                                               historyItem.langOriginal,
                                               historyItem.langTranslation,

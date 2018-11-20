@@ -47,6 +47,7 @@ Page {
 
                 ComboBox {
                     property var dataModel: languagesModel
+                    property bool inited: false
                     id: fromLangComboBox
                     width:  parent.width / 2 - Theme.paddingMedium * 3
 
@@ -67,9 +68,10 @@ Page {
                     }
                     onCurrentItemChanged: {
                         var length = dataModel.count;
-                        if (currentIndex !== 0) {
+                        if (inited) {
                             return;
                         }
+                        inited = true;
 
                         for (var i = 0; i < length; i++) {
                             if (dataModel.get(i).key === defaultLang) {
@@ -86,15 +88,18 @@ Page {
                                                                     ? Theme.highlightColor
                                                                     : Theme.primaryColor)
                     onClicked: {
+                        console.log(fromLangComboBox.currentIndex, toLangComboBox.currentIndex);
                         originalTextEdit.text = translatedTextArea.text;
                         var to = toLangComboBox.currentIndex;
-                        toLangComboBox.currentIndex = fromLangComboBox.currentIndex;
-                        fromLangComboBox.currentIndex = to;
+                        toLangComboBox.selectLang(fromLangComboBox.currentIndex);
+                        fromLangComboBox.selectLang(to);
+                        console.log(fromLangComboBox.currentIndex, toLangComboBox.currentIndex);
                     }
                 }
 
                 ComboBox {
                     property var dataModel : languagesModel
+                    property bool inited: false
                     id: toLangComboBox
                     x: Theme.paddingLarge
                     width:  parent.width / 2 - Theme.paddingMedium * 3
@@ -116,9 +121,10 @@ Page {
                     }
                     onCurrentItemChanged: {
                         var length = dataModel.count;
-                        if (currentIndex !== 0) {
+                        if (inited) {
                             return;
                         }
+                        inited = true;
 
                         for (var i = 0; i < length; i++) {
                             if (dataModel.get(i).key === defaultToLang) {
