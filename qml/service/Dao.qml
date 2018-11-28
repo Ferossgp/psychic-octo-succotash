@@ -28,6 +28,14 @@ Item {
         });
     }
 
+    function retrieveStarredItem(callback) {
+        database = LocalStorage.openDatabaseSync("Translator", "1.0");
+        database.readTransaction(function(tx) {
+            var result = tx.executeSql("SELECT * FROM HistoryTable WHERE starred = 1");
+            callback(result.rows)
+        });
+    }
+
     function createHistoryItem(langOriginal, langTranslation, text, translated, starred) {
         database = LocalStorage.openDatabaseSync("Translator", "1.0");
         database.transaction(function(tx) {

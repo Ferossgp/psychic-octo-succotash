@@ -103,7 +103,7 @@ Page {
                     id: toLangComboBox
                     x: Theme.paddingLarge
                     width:  parent.width / 2 - Theme.paddingMedium * 3
-                    label: qsTr("To:")
+                    label: qsTr("To:    ")
 
                     menu: ContextMenu {
                         Repeater {

@@ -4,7 +4,7 @@
 <context>
     <name>CoverPage</name>
     <message>
-        <source>My Cover</source>
+        <source>You don&apos;t have any starred item in history right now</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -23,10 +23,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>To:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source></source>
         <translation></translation>
     </message>
@@ -36,6 +32,10 @@
     </message>
     <message>
         <source>Synonyms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To:    </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
