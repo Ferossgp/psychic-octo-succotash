@@ -11,6 +11,7 @@ Page {
     property string placeholder: qsTr("Start typing...")
     property string yandexAPI
     property string yandexDictAPI
+    property string interfaceLang: 'en'
     property string defaultLang: 'en'
     property string defaultToLang: 'ru'
 
@@ -47,6 +48,7 @@ Page {
 
                 ComboBox {
                     property var dataModel: languagesModel
+                    property var detectModel: detectLangModel
                     property bool inited: false
                     id: fromLangComboBox
                     width:  parent.width / 2 - Theme.paddingMedium * 3
@@ -66,18 +68,25 @@ Page {
                     function selectLang(index) {
                         currentIndex = index;
                     }
+                    function selectLangFromString(lang) {
+                        var length = dataModel.count;
+                        for (var i = 0; i < length; i++) {
+                            if (dataModel.get(i).key === lang) {
+                                currentIndex = i;
+                                return;
+                            }
+                        }
+                        currentIndex = -1;
+                        currentItem = null;
+                    }
+
                     onCurrentItemChanged: {
                         var length = dataModel.count;
                         if (inited) {
                             return;
                         }
                         inited = true;
-
-                        for (var i = 0; i < length; i++) {
-                            if (dataModel.get(i).key === defaultLang) {
-                                currentIndex = i;
-                            }
-                        }
+                        selectLangFromString(defaultLang);
                     }
                 }
 
@@ -88,12 +97,10 @@ Page {
                                                                     ? Theme.highlightColor
                                                                     : Theme.primaryColor)
                     onClicked: {
-                        console.log(fromLangComboBox.currentIndex, toLangComboBox.currentIndex);
                         originalTextEdit.text = translatedTextArea.text;
                         var to = toLangComboBox.currentIndex;
                         toLangComboBox.selectLang(fromLangComboBox.currentIndex);
                         fromLangComboBox.selectLang(to);
-                        console.log(fromLangComboBox.currentIndex, toLangComboBox.currentIndex);
                     }
                 }
 
@@ -147,6 +154,12 @@ Page {
                 placeholderText: placeholder
                 inputMethodHints: Qt.ImhNoPredictiveText;
                 onTextChanged: {
+                    detectLangModel.inputText = text;
+                    detectLangModel.reload();
+                    if (fromLangComboBox.currentIndex < 0) {
+                        return;
+                    }
+
                     translationModel.inputText = text;
                     translationModel.reload();
                     synonymsModel.inputText = text;
@@ -239,10 +252,23 @@ Page {
 
         XmlListModel {
             id: languagesModel
-            source: "https://translate.yandex.net/api/v1.5/tr/getLangs?key=" + yandexAPI + "&ui=" + defaultLang
+            source: "https://translate.yandex.net/api/v1.5/tr/getLangs?key=" + yandexAPI + "&ui=" + interfaceLang
             query: "/Langs/langs/Item"
             XmlRole {name: "value"; query: "@value/string()"}
             XmlRole {name: "key"; query: "@key/string()"}
+        }
+
+        XmlListModel {
+            id: detectLangModel
+            property string inputText: ""
+            source: "https://translate.yandex.net/api/v1.5/tr/detect?key=" + yandexAPI + "&text=" + inputText
+            query: "/DetectedLang"
+            XmlRole {name: "lang"; query: "@lang/string()"}
+            onStatusChanged: {
+                if (status === XmlListModel.Ready) {
+                    fromLangComboBox.selectLangFromString(detectLangModel.get(0).lang);
+                }
+            }
         }
 
         XmlListModel {
