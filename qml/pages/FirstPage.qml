@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import QtQuick.XmlListModel 2.0
+import '../utils.js' as Utils
 
 Page {
     id: page
@@ -14,14 +15,34 @@ Page {
     property string interfaceLang: 'en'
     property string defaultLang: 'en'
     property string defaultToLang: 'ru'
+    property var limitStartTime: new Date()
+    property int refreshesThisSecond: 0
 
-    // To enable PullDownMenu, place our content in a SilicaFlickable
+
+    Timer {
+        id: timer
+    }
+
+    function delay(delayTime, cb) {
+        timer.interval = delayTime;
+        timer.repeat = false;
+        timer.triggered.connect(cb);;
+        timer.triggered.connect(function release () {
+            timer.triggered.disconnect(cb);
+            timer.triggered.disconnect(release);
+        });
+        timer.start();
+        return function() {
+            timer.restart();
+        };
+    }
 
     SilicaFlickable {
         anchors.fill: parent
 
         // PullDownMenu and PushUpMenu must be declared in SilicaFlickable, SilicaListView or SilicaGridView
         PullDownMenu {
+            quickSelect: true
             MenuItem {
                 text: qsTr("History")
                 onClicked: pageStack.push(Qt.resolvedUrl("HistoryPage.qml"))
@@ -153,20 +174,21 @@ Page {
                 wrapMode: TextEdit.Wrap;
                 placeholderText: placeholder
                 inputMethodHints: Qt.ImhNoPredictiveText;
-                onTextChanged: {
-                    detectLangModel.inputText = text;
+                onTextChanged: delay(500, function(){
+                    detectLangModel.inputText = originalTextEdit.text;
                     detectLangModel.reload();
                     if (fromLangComboBox.currentIndex < 0) {
                         return;
                     }
-
-                    translationModel.inputText = text;
+                    translationModel.inputText = originalTextEdit.text;
                     translationModel.reload();
-                    synonymsModel.inputText = text;
+                    synonymsModel.inputText = originalTextEdit.text;
                     synonymsModel.reload();
                     saveButton.pressed = false;
-                }
+                })
+
             }
+
             TextArea {
                 id: translatedTextArea;
                 x: Theme.paddingLarge;
