@@ -180,54 +180,40 @@ Page {
                 inputMethodHints: Qt.ImhNoPredictiveText;
             }
 
-            TextArea {
-                id: synonymsTextArea;
-                x: Theme.paddingLarge;
-                property var dataModel : synonymsModel
-                width: parent.width;
-                readOnly: true
-                label: qsTr('Synonyms')
-                text: {
-                    var length = dataModel.count;
-                    if (length === 0) {
-                        return "";
-                    }
-                    var res = "";
-                    var nCount = 3, vCount = 3, aCount = 3, otherCount = 3;
-                    var needAdd = false;
-                    for(var i = 0; i < length; i++) {
-                        var item = dataModel.get(i);
-                        switch (item.pos) {
-                        case 'noun':
-                            needAdd = nCount > 0;
-                            nCount -= 1;
-                            break;
-                        case 'verb':
-                            needAdd = vCount > 0;
-                            vCount -= 1;
-                            break;
-                        case 'adjective':
-                            needAdd = aCount > 0;
-                            aCount -= 1;
-                            break;
-                        default:
-                            needAdd = otherCount > 0;
-                            otherCount -= 1;
-                            break;
-                        }
-                        if (needAdd) {
-                            if (i !== 0) {
-                                res += '\n';
-                            }
-                            res += item.pos.substring(0, 1) + ': ' + item.def
-                        }
-                    }
-                    return res;
+            Component {
+                id: sectionHeading
+                Label {
+                    width: parent.width
+                    text: section
+                    color: Theme.highlightColor
+                    font.bold: true
+                    font.pixelSize: Theme.fontSizeSmall
+                    z: -1
                 }
-                font.pixelSize: Theme.fontSizeMedium;
-                color: placeholderVisible ? Theme.secondaryColor : Theme.primaryColor
-                wrapMode: TextEdit.Wrap;
-                inputMethodHints: Qt.ImhNoPredictiveText;
+            }
+
+            Rectangle {
+                width: parent.width - 120
+                height: 600
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: 'transparent'
+
+                ListView {
+                    id: synonymsListView
+                    anchors.fill: parent
+                    width: parent.width
+                    model: synonymsModel
+                    delegate: Text {
+                        color: Theme.primaryColor
+                        font.pixelSize: Theme.fontSizeMedium
+                        text: def
+                    }
+                    clip: true
+                    snapMode: ListView.SnapToItem
+                    section.property: "pos"
+                    section.criteria: ViewSection.NextLabelAtEnd
+                    section.delegate: sectionHeading
+                }
             }
 
             Button {
